@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SoulsAssetPipeline;
 
 namespace DSAnimStudio.TaeEditor
 {
@@ -24,7 +25,8 @@ namespace DSAnimStudio.TaeEditor
 
         bool IsGameLongAnimNames => (Game == SoulsAssetPipeline.SoulsGames.BB || 
             Game == SoulsAssetPipeline.SoulsGames.DS3 || 
-            Game == SoulsAssetPipeline.SoulsGames.SDT);
+            Game == SoulsAssetPipeline.SoulsGames.SDT || 
+            Game == SoulsGames.ER);
 
         private (long Upper, long Lower) GetSplitAnimID(long id)
         {

@@ -346,7 +346,8 @@ namespace DSAnimStudio
                         return false;
                 }
                 else if (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.BB || 
-                    GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT)
+                    GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT|| 
+                    GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.ER)
                 {
                     if (Directory.Exists($"{interroot}\\param\\GameParam\\") && File.Exists($"{interroot}\\param\\GameParam\\GameParam.parambnd.dcx"))
                         ParamBNDs[GameDataManager.GameType] = BND4.Read($"{interroot}\\param\\GameParam\\GameParam.parambnd.dcx");

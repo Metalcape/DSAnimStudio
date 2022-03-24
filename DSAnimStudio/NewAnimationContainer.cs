@@ -214,6 +214,8 @@ namespace DSAnimStudio
                 for (int i = 0; i < allAnimNames.Count; i++)
                 {
                     prog?.Report(1.0 * i / allAnimNames.Count);
+                    ErrorLog.LogInfo($"load anims {allAnimNames[i]}");
+
                     CurrentAnimationName = allAnimNames[i];
                 }
                 CurrentAnimationName = null;
@@ -232,6 +234,8 @@ namespace DSAnimStudio
         public bool InitializeNewAnimLayersUnweighted = true;
 
         private string _currentAnimationName = null;
+        
+        // TODO: SET CURR ANIM
         public string CurrentAnimationName
         {
             get => _currentAnimationName;
@@ -301,6 +305,7 @@ namespace DSAnimStudio
 
                                 anim.RootMotion.ResetToStart(RootMotionTransform.GetRootMotionVector4());
 
+                                ErrorLog.LogInfo($"AnimationLayers added {anim.Name}");
                                 AnimationLayers.Add(anim);
                             }
 
@@ -612,11 +617,11 @@ namespace DSAnimStudio
             try
             {
                 hkx = HKX.Read(hkxBytes, hkxVariation, isDS1RAnimHotfix: (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.DS1R
-                || GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT));
+                || GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT ||  GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.ER));
             }
-            catch
+            catch(Exception e)
             {
-
+                ErrorLog.LogError($"failed to load anim hkx: {e}");
             }
 
             if (hkx == null)
@@ -710,6 +715,7 @@ namespace DSAnimStudio
         public void LoadAdditionalANIBND(IBinder anibnd, IProgress<double> progress, bool scanAnims)
         {
             var hkxVariation = GameDataManager.GetCurrentLegacyHKXType();
+            ErrorLog.LogInfo($"LoadAdditionalANIBND {hkxVariation}");
 
             if (hkxVariation == HKX.HKXVariation.Invalid)
             {
@@ -739,6 +745,7 @@ namespace DSAnimStudio
 
                 i = 0;
                 fileCount = animHKXs.Count;
+                ErrorLog.LogInfo($"found anim hkx {fileCount}");
 
                 foreach (var kvp in animHKXs)
                 {
@@ -785,6 +792,7 @@ namespace DSAnimStudio
         {
             var hkxVariation = GameDataManager.GetCurrentLegacyHKXType();
 
+            ErrorLog.LogInfo("LoadBaseANIBND "+ hkxVariation);
             if (hkxVariation == HKX.HKXVariation.Invalid)
             {
                 //TODO
@@ -806,10 +814,13 @@ namespace DSAnimStudio
                         || shortName == "skeleton_2.hkx"
                         || shortName == "skeleton_3.hkx")
                     {
+                        // File.WriteAllBytes(@"D:\Steam\steamapps\common\ELDEN RING\Game\dsanime\loaded.hxk", f.Bytes);
+                        ErrorLog.LogInfo("Read skeleton hkx");
                         skeletonHKX = HKX.Read(f.Bytes, hkxVariation, isDS1RAnimHotfix: (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.DS1R));
                     }
                     else if (shortName.StartsWith("a") && shortName.EndsWith(".hkx"))
                     {
+                        ErrorLog.LogInfo($"find anims {shortName} from base anibnd");
                         if (!animHKXs.ContainsKey(shortName))
                             animHKXs.Add(shortName, f.Bytes);
                         else
@@ -844,7 +855,9 @@ namespace DSAnimStudio
                     throw new InvalidOperationException("HKX skeleton file had no actual skeleton class");
                 }
 
+                // TODO: Load Skeleton
                 Skeleton = new NewAnimSkeleton_HKX();
+                ErrorLog.LogInfo("Load skeleton");
                 Skeleton.LoadHKXSkeleton(hkaSkeleton);
 
                 i = 0;

@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SoulsAssetPipeline;
 
 namespace DSAnimStudio
 {
@@ -116,7 +117,7 @@ namespace DSAnimStudio
                 TryToLoadFromMSGBND("engus", "item_dlc2.msgbnd.dcx", 211, 212); //DLC1
                 TryToLoadFromMSGBND("engus", "item_dlc2.msgbnd.dcx", 251, 252); //DLC2
             }
-            else if (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT)
+            else if (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT || GameDataManager.GameType == SoulsGames.ER)
             {
                 TryToLoadFromMSGBND("engus", "item.msgbnd.dcx", 11, 12);
             }
