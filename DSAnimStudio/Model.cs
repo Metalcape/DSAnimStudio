@@ -234,6 +234,7 @@ namespace DSAnimStudio
             SapImportConfigs.ImportConfigFlver2 modelImportConfig = null, List<TPF> tpfsUsed = null)
             : this()
         {
+            ErrorLog.LogInfo("Creating Model " + name);
             AnimContainer = new NewAnimationContainer();
 
             Name = name;
@@ -361,10 +362,10 @@ namespace DSAnimStudio
                             AnimContainer.LoadBaseANIBND(anibnd, innerProg);
                             //SkeletonFlver.MapToSkeleton(AnimContainer.Skeleton, false);
                         }
-                        catch
+                        catch(Exception e)
                         {
                             //DialogManager.DialogOK(null, "Failed to load animations.");
-                            ErrorLog.LogWarning($"Failed to load animations for model '{Name}'.");
+                            ErrorLog.LogWarning($"Failed to load animations for model '{Name}': {e}.");
                             //System.Windows.Forms.MessageBox.Show("Failed to load animations.", "Error",
                             //    System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Error);
                         }
@@ -408,14 +409,14 @@ namespace DSAnimStudio
 
             loadingProgress?.Report(3.5 / 4.0);
 
-            if (additionalTexbnd != null)
-            {
+            if (additionalTexbnd != null) {
                 LoadingTaskMan.DoLoadingTaskSynchronous($"{Name}_AdditionalTEXBND", 
                     $"Loading extra TEXBND for {Name}...", innerProg =>
-                {
-                    TexturePool.AddTextureBnd(additionalTexbnd, innerProg);
-                    MainMesh.TextureReloadQueued = true;
-                });
+                    {
+                        TexturePool.AddTextureBnd(additionalTexbnd, innerProg);
+                        MainMesh.TextureReloadQueued = true;
+                    });
+                
             }
 
             loadingProgress?.Report(3.9 / 4.0);
@@ -504,9 +505,16 @@ namespace DSAnimStudio
 
         public void UpdateAnimation()
         {
+            if (AnimContainer.Skeleton.OriginalHavokSkeleton == null) {
+                ErrorLog.LogInfo("AnimContainer.Skeleton.OriginalHavokSkeleton is null");
+            }
+            if (AnimContainer == null) {
+                ErrorLog.LogInfo("AnimContainer is null");
+            }
             if (AnimContainer.Skeleton.OriginalHavokSkeleton == null || AnimContainer == null)
                 SkeletonFlver?.RevertToReferencePose();
 
+            ErrorLog.LogInfo("UpdateAnimContainer");
             AnimContainer?.Update();
 
             if (AnimContainer?.ForcePlayAnim == true)

@@ -371,7 +371,8 @@ namespace DSAnimStudio
                         }
                     }
                     else if (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.DS3 || 
-                        GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT)
+                        GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT || 
+                        GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.ER)
                     {
                         var dummyPolyID = isLeft ? wpn.DS3_GetLeftWeaponDummyPoly(this, modelIdx)
                             : wpn.DS3_GetRightWeaponDummyPoly(this, modelIdx);
@@ -866,7 +867,7 @@ namespace DSAnimStudio
                 {
                     renderWpn = (modelIdx == 0);
                 }
-                else if (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.DS3 || GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT)
+                else if (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.DS3 || GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT || GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.ER)
                 {
                     var dummyPolyID = isLeft ? wpn.DS3_GetLeftWeaponDummyPoly(this, modelIdx)
                             : wpn.DS3_GetRightWeaponDummyPoly(this, modelIdx);
@@ -1103,6 +1104,10 @@ namespace DSAnimStudio
                         LoadArmorPartsbnd(GameDataManager.GetInterrootPath($@"parts\fg_a_0100.partsbnd.dcx"), EquipSlot.Facegen);
                     }
                     else if (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.SDT)
+                    {
+                        LoadArmorPartsbnd(GameDataManager.GetInterrootPath($@"parts\fc_m_0100.partsbnd.dcx"), EquipSlot.Face);
+                    }
+                    else if (GameDataManager.GameType == SoulsAssetPipeline.SoulsGames.ER)
                     {
                         LoadArmorPartsbnd(GameDataManager.GetInterrootPath($@"parts\fc_m_0100.partsbnd.dcx"), EquipSlot.Face);
                     }

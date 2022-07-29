@@ -158,6 +158,8 @@ namespace DSAnimStudio
             {
                 Models.Add(mdl);
             }
+            
+            ErrorLog.LogInfo("Models count: " +Models.Count);
            
         }
 

@@ -23,7 +23,7 @@ namespace DSAnimStudio
     /// </summary>
     public class Main : Game
     {
-        public const string VERSION = "Version 3.0.5";
+        public const string VERSION = "Version 3.0.6 - Age of Meows [WIP]";
 
         public static T ReloadMonoGameContent<T>(string path)
         {
@@ -1020,8 +1020,9 @@ namespace DSAnimStudio
                         DELTA_UPDATE_ROUNDED = DELTA_UPDATE;
                     }
 
-                    if (!LoadingTaskMan.AnyTasksRunning())
+                    if (!LoadingTaskMan.AnyTasksRunning()) {
                         Scene.UpdateAnimation();
+                    }
 
                     float elapsed = (float)gameTime.ElapsedGameTime.TotalSeconds;
 

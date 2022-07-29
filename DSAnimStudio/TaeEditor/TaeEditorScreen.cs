@@ -934,7 +934,7 @@ namespace DSAnimStudio.TaeEditor
 
 
 
-                var index = SelectedTae.Animations.IndexOf(SelectedTaeAnim);
+            var index = SelectedTae.Animations.IndexOf(SelectedTaeAnim);
             SelectedTae.Animations.Insert(index + 1, newAnimRef);
 
             RecreateAnimList();

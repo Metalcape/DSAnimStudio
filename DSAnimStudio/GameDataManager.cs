@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using System.Windows.Forms;
 using Microsoft.Xna.Framework;
 using SoulsAssetPipeline;
 
@@ -50,6 +51,7 @@ namespace DSAnimStudio
             { SoulsGames.DS3, "Dark Souls III" },
             { SoulsGames.BB, "Bloodborne" },
             { SoulsGames.SDT, "Sekiro: Shadows Die Twice" },
+            { SoulsGames.ER, "Elden Ring" },
         };
 
         public static bool CheckGameTypeParamIDCompatibility(SoulsGames a, SoulsGames b)
@@ -82,7 +84,7 @@ namespace DSAnimStudio
         public static bool GameTypeUsesLegacyEmptyEventGroups => IsGame(SoulsGames.DES | SoulsGames.DS1 | SoulsGames.DS1R);
 
         public static bool GameTypeUsesBoilerplateEventGroups => 
-            IsGame(SoulsGames.DS3 | SoulsGames.SDT | SoulsGames.BB) || 
+            IsGame(SoulsGames.DS3 | SoulsGames.SDT | SoulsGames.ER | SoulsGames.BB) || 
             (GameTypeUsesLegacyEmptyEventGroups && Main.Config.SaveAdditionalEventRowInfoToLegacyGames);
 
         public static AnimIDFormattingType CurrentAnimIDFormatType
@@ -98,6 +100,7 @@ namespace DSAnimStudio
                     case SoulsGames.BB:
                     case SoulsGames.DS3:
                     case SoulsGames.SDT:
+                    case SoulsGames.ER:
                         return AnimIDFormattingType.aXXX_YYYYYY;
                     case SoulsGames.DS2SOTFS:
                         return AnimIDFormattingType.aXX_YY_ZZZZ;
@@ -108,7 +111,7 @@ namespace DSAnimStudio
         }
 
         public static bool GameTypeIsHavokTagfile =>
-            (GameType == SoulsGames.DS1R || GameType == SoulsGames.SDT);
+            (GameType == SoulsGames.DS1R || GameType == SoulsGames.SDT || GameType == SoulsGames.ER);
 
         public static HKX.HKXVariation GetCurrentLegacyHKXType()
         {
@@ -121,6 +124,8 @@ namespace DSAnimStudio
             else if (GameType == SoulsGames.BB)
                 return HKX.HKXVariation.HKXBloodBorne;
             else if (GameType == SoulsGames.SDT)
+                return HKX.HKXVariation.HKXDS1;
+            else if (GameType == SoulsGames.ER)
                 return HKX.HKXVariation.HKXDS1;
 
             return HKX.HKXVariation.Invalid;
@@ -238,6 +243,11 @@ namespace DSAnimStudio
                 else if (check.Contains(@"\NTC\"))
                 {
                     GameDataManager.Init(SoulsAssetPipeline.SoulsGames.SDT, interroot);
+                    return true;
+                }
+                else if (check.Contains(@"GR") && check.Contains(@"INTERROOT_win64"))
+                {
+                    GameDataManager.Init(SoulsAssetPipeline.SoulsGames.ER, interroot);
                     return true;
                 }
             }
@@ -437,7 +447,7 @@ namespace DSAnimStudio
             LoadingTaskMan.DoLoadingTaskSynchronous($"LOAD_OBJ_{id}", $"Loading object {id}...", progress =>
             {
                 
-                    if (GameType == SoulsGames.DS3 || GameType == SoulsGames.BB || GameType == SoulsGames.SDT)
+                    if (GameType == SoulsGames.DS3 || GameType == SoulsGames.BB || GameType == SoulsGames.SDT || GameType == SoulsGames.ER)
                     {
                         var chrbnd = BND4.Read(GetInterrootPath($@"obj\{id}.objbnd.dcx"));
 
@@ -478,7 +488,7 @@ namespace DSAnimStudio
                                         TexturePool.AddTpfFromPath(GetInterrootPath($@"map\tx\{tex}.tpf"));
                                     }
                                 }
-                                else if (GameType == SoulsGames.DS3 || GameType == SoulsGames.SDT || GameType == SoulsGames.BB)
+                                else if (GameType == SoulsGames.DS3 || GameType == SoulsGames.SDT || GameType == SoulsGames.ER || GameType == SoulsGames.BB)
                                 {
                                     int objGroup = int.Parse(id.Substring(1)) / 1_0000;
                                     string mapDirName = GetInterrootPath($@"map\m{objGroup:D2}");
@@ -634,18 +644,33 @@ namespace DSAnimStudio
 
                 LoadingTaskMan.DoLoadingTaskSynchronous($"LOAD_CHR_{id}", $"Loading character {id}...", progress =>
                 {
-                    if (GameType == SoulsGames.DS3 || GameType == SoulsGames.SDT)
+                    if (GameType == SoulsGames.DS3 || GameType == SoulsGames.SDT || GameType == SoulsGames.ER)
                     {
                         var chrbnd = BND4.Read(GetInterrootPath($@"chr\{id}.chrbnd.dcx"));
                         IBinder texbnd = null;
+                        // List<IBinder> extraTexbnd = new List<IBinder>();
                         IBinder extraTexbnd = null;
                         IBinder anibnd = null;
+                        List<IBinder> extraAni = new List<IBinder>();
 
                         if (System.IO.File.Exists(GetInterrootPath($@"chr\{id}.texbnd.dcx")))
                             texbnd = BND4.Read(GetInterrootPath($@"chr\{id}.texbnd.dcx"));
 
-                        if (System.IO.File.Exists(GetInterrootPath($@"chr\{id.Substring(0, 4)}9.texbnd.dcx")))
+                        if (System.IO.File.Exists(GetInterrootPath($@"chr\{id.Substring(0, 4)}9.texbnd.dcx"))) {
                             extraTexbnd = BND4.Read(GetInterrootPath($@"chr\{id.Substring(0, 4)}9.texbnd.dcx"));
+                        }
+
+
+                        if (GameType == SoulsGames.ER) {
+                            // if (File.Exists(GetInterrootPath($@"chr\{id.Substring(0, 4)}_h.texbnd.dcx "))) {
+                            //     extraTexbnd.Add( BND4.Read(GetInterrootPath($@"chr\{id.Substring(0, 4)}_h.texbnd.dcx ")));
+                            // }
+                            //
+                            // if (File.Exists(GetInterrootPath($@"chr\{id.Substring(0, 4)}_l.texbnd.dcx "))) {
+                            //     extraTexbnd.Add( BND4.Read(GetInterrootPath($@"chr\{id.Substring(0, 4)}_l.texbnd.dcx ")));
+                            // }
+                        }
+
 
                         if (texbnd != null && modelToImportDuringLoad != null)
                         {
@@ -660,19 +685,40 @@ namespace DSAnimStudio
 
 
 
-                        if (GameType == SoulsGames.SDT)
+                        if ((GameType == SoulsGames.SDT || GameType == SoulsGames.ER) && 
+                            (System.IO.File.Exists(GetInterrootPath($@"chr\{id}.anibnd.dcx.2010"))))
                         {
-                            if (System.IO.File.Exists(GetInterrootPath($@"chr\{id}.anibnd.dcx.2010")))
                                 anibnd = BND4.Read(GetInterrootPath($@"chr\{id}.anibnd.dcx.2010"));
+
+                            // if (GameType == SoulsGames.ER) {
+                            //     if (System.IO.File.Exists(GetInterrootPath($@"chr\{id}_div00.anibnd.dcx.2010"))) {
+                            //         extraAni.Add(BND4.Read(GetInterrootPath($@"chr\{id}_div00.anibnd.dcx.2010")));
+                            //     }
+                            //     if (System.IO.File.Exists(GetInterrootPath($@"chr\{id}_div01.anibnd.dcx.2010"))) {
+                            //         extraAni.Add(BND4.Read(GetInterrootPath($@"chr\{id}_div01.anibnd.dcx.2010")));
+                            //     }
+                            // }
                         }
                         else
                         {
-                            if (System.IO.File.Exists(GetInterrootPath($@"chr\{id}.anibnd.dcx")))
+                            if (System.IO.File.Exists(GetInterrootPath($@"chr\{id}.anibnd.dcx"))) {
                                 anibnd = BND4.Read(GetInterrootPath($@"chr\{id}.anibnd.dcx"));
+                            }
+
+                            // if (GameType == SoulsGames.ER) {
+                            //     if (System.IO.File.Exists(GetInterrootPath($@"chr\{id}_div00.anibnd.dcx"))) {
+                            //         extraAni.Add(BND4.Read(GetInterrootPath($@"chr\{id}_div00.anibnd.dcx")));
+                            //     }
+                            //
+                            //     if (System.IO.File.Exists(GetInterrootPath($@"chr\{id}_div01.anibnd.dcx"))) {
+                            //         extraAni.Add(BND4.Read(GetInterrootPath($@"chr\{id}_div01.anibnd.dcx")));
+                            //     }
+                            // }
                         }
 
+                        ErrorLog.LogInfo("Try creating Model " + id);
                         chr = new Model(progress, id, chrbnd, 0, anibnd, texbnd,
-                            ignoreStaticTransforms: true, additionalTexbnd: extraTexbnd, 
+                            ignoreStaticTransforms: true, additionalTexbnd: extraTexbnd, // additionalAnibnd: extraAni,
                             modelToImportDuringLoad: modelToImportDuringLoad, 
                             modelImportConfig: importConfig);
 
@@ -1323,7 +1369,7 @@ namespace DSAnimStudio
                                 anibnd = TaeEditor.TaeFileContainer.GenerateDemonsSoulsConvertedAnibnd(anibnds[i]);
                             }
 
-                            if ((GameType == SoulsGames.SDT || GameType == SoulsGames.DS1R || GameType == SoulsGames.DES) && System.IO.File.Exists(anibnds[i] + ".2010"))
+                            if ((GameType == SoulsGames.SDT || GameType == SoulsGames.ER || GameType == SoulsGames.DS1R || GameType == SoulsGames.DES) && System.IO.File.Exists(anibnds[i] + ".2010"))
                             {
                                 anibndName = anibnds[i] + ".2010";
                             }
@@ -1335,7 +1381,7 @@ namespace DSAnimStudio
 
                             string anibndCheck = Path.GetFileNameWithoutExtension(anibndName).ToLower();
 
-                            bool isFirstPlayerAnibnd = anibndCheck.Contains(GameType == SoulsGames.SDT ? "c0000_a000_lo" : "c0000_a00_lo");
+                            bool isFirstPlayerAnibnd = anibndCheck.Contains((GameType == SoulsGames.SDT || GameType == SoulsGames.ER) ? "c0000_a000_lo" : "c0000_a00_lo");
 
                             chr.AnimContainer.LoadAdditionalANIBND(anibnd, null, scanAnims: isFirstPlayerAnibnd);
 
@@ -1367,7 +1413,7 @@ namespace DSAnimStudio
                                     anibnd = TaeEditor.TaeFileContainer.GenerateDemonsSoulsConvertedAnibnd(additionalAnibnds[i]);
                                 }
 
-                                if ((GameType == SoulsGames.SDT || GameType == SoulsGames.DS1R || GameType == SoulsGames.DES) && System.IO.File.Exists(additionalAnibnds[i] + ".2010"))
+                                if ((GameType == SoulsGames.SDT || GameType == SoulsGames.ER || GameType == SoulsGames.DS1R || GameType == SoulsGames.DES) && System.IO.File.Exists(additionalAnibnds[i] + ".2010"))
                                 {
                                     anibndName = additionalAnibnds[i] + ".2010";
                                 }
@@ -1377,6 +1423,7 @@ namespace DSAnimStudio
                                 else
                                     anibnd = BND4.Read(anibndName);
 
+                                ErrorLog.LogInfo("Loading additional Anibnd " + anibndName);
                                 chr.AnimContainer.LoadAdditionalANIBND(anibnd, null, scanAnims: true);
 
                                 progress.Report(1.0 * i / additionalAnibnds.Count);

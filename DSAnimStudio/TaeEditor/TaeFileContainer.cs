@@ -294,6 +294,10 @@ namespace DSAnimStudio.TaeEditor
             {
                 GameDataManager.Init(SoulsAssetPipeline.SoulsGames.SDT, interroot);
             }
+            else if (check.Contains(@"\GR\"))
+            {
+                GameDataManager.Init(SoulsAssetPipeline.SoulsGames.ER, interroot);
+            }
         }
 
         private static byte[] ConvertDeSAnimation(byte[] inputBytes)
